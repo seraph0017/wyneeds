@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>航空订票系统交付包评估报告</title>
+<style>
+@page { size: A4; margin: 13mm 12mm; }
+:root { --ink:#172033; --sub:#5d6678; --muted:#8992a3; --blue:#1d4ed8; --blue2:#eaf1ff; --line:#dde3ee; --bg:#f4f7fb; --green:#087f5b; --amber:#b45309; --red:#b42318; }
+* { box-sizing:border-box; }
+html,body { margin:0; color:var(--ink); background:#eef2f7; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",Arial,sans-serif; font-size:14px; line-height:1.65; }
+body { padding:24px; }
+.report { max-width:1040px; margin:0 auto; }
+.page { background:#fff; border:1px solid #dfe5ef; border-radius:24px; padding:34px 38px; margin:0 0 22px; box-shadow:0 18px 50px rgba(31,41,55,.10); break-after:page; page-break-after:always; min-height:980px; }
+.page:last-child { break-after:auto; page-break-after:auto; }
+.cover { color:#fff; border:0; background:radial-gradient(circle at 85% 15%, rgba(96,165,250,.35), transparent 32%), linear-gradient(135deg,#0b1220 0%,#173b8f 58%,#2457c5 100%); display:flex; flex-direction:column; justify-content:space-between; }
+.kicker { letter-spacing:.18em; color:#bfd7ff; font-weight:700; font-size:12px; text-transform:uppercase; }
+h1 { margin:18px 0 14px; font-size:44px; line-height:1.12; letter-spacing:-.04em; }
+h2 { margin:0 0 18px; font-size:26px; line-height:1.25; letter-spacing:-.03em; }
+h3 { margin:0 0 8px; font-size:17px; }
+p { margin:0 0 12px; }
+.lead { font-size:19px; line-height:1.75; color:#eaf2ff; max-width:820px; }
+.cover-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-top:34px; }
+.cover-stat { background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.22); border-radius:18px; padding:16px; }
+.cover-stat span { display:block; color:#c8d9ff; font-size:12px; }
+.cover-stat b { display:block; font-size:24px; margin-top:5px; }
+.verdict { background:#f8fbff; border:1px solid #d8e6ff; border-radius:22px; padding:22px; margin-bottom:20px; }
+.verdict strong { color:#123a8c; }
+.grid2 { display:grid; grid-template-columns:1fr 1fr; gap:18px; }
+.grid3 { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
+.card { border:1px solid var(--line); border-radius:18px; padding:18px; background:#fff; break-inside:avoid; }
+.card.blue { background:var(--blue2); border-color:#c9dcff; }
+.card.green { background:#ecfdf3; border-color:#b7ebcb; }
+.card.amber { background:#fff7ed; border-color:#fed7aa; }
+.big { font-size:22px; font-weight:800; letter-spacing:-.02em; }
+.sub { color:var(--sub); }
+.actor h3 { color:#123a8c; }
+.actor p { color:var(--sub); margin-bottom:8px; }
+ul { margin:8px 0 0; padding-left:19px; }
+li { margin:5px 0; }
+.flow { list-style:none; padding:0; margin:0; display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+.flow li { display:grid; grid-template-columns:32px 1fr; gap:10px; border:1px solid #dce6f6; background:#fbfdff; border-radius:16px; padding:12px; min-height:58px; }
+.flow span { width:28px; height:28px; border-radius:50%; background:var(--blue); color:#fff; display:grid; place-items:center; font-weight:800; }
+.flow p { margin:2px 0 0; }
+.module { border:1px solid #dce6f6; background:#fbfdff; border-radius:16px; padding:15px; min-height:116px; break-inside:avoid; }
+.module b { display:block; margin-bottom:6px; color:#123a8c; font-size:16px; }
+.module p { margin:0; color:#46546a; }
+.timeline { display:grid; gap:12px; }
+.timeline .item { display:grid; grid-template-columns:120px 1fr; gap:16px; padding:14px; border:1px solid var(--line); border-radius:16px; }
+.timeline b { color:#123a8c; }
+table { width:100%; border-collapse:separate; border-spacing:0; overflow:hidden; border:1px solid var(--line); border-radius:16px; background:#fff; }
+th,td { text-align:left; vertical-align:top; padding:11px 12px; border-bottom:1px solid #edf1f7; }
+th { background:#f5f7fb; color:#5b6678; font-size:12px; letter-spacing:.06em; text-transform:uppercase; }
+tr:last-child td { border-bottom:0; }
+.badge { display:inline-block; border-radius:999px; padding:4px 10px; background:#eaf1ff; color:#123a8c; font-weight:700; font-size:12px; }
+.quote { border-left:4px solid var(--blue); padding:8px 0 8px 14px; color:#334155; font-size:18px; line-height:1.75; }
+.footer-note { color:#6b7280; font-size:12px; margin-top:18px; }
+.toc { display:grid; grid-template-columns:repeat(2,1fr); gap:12px; margin-top:28px; }
+.toc div { padding:14px; border:1px solid rgba(255,255,255,.25); background:rgba(255,255,255,.10); border-radius:16px; }
+.toc b { display:block; color:#fff; }
+.toc span { color:#c8d9ff; font-size:12px; }
+.print-link a { color:#123a8c; text-decoration:none; }
+@media print {
+  html,body { background:#fff; padding:0; font-size:12.2px; }
+  body { padding:0; }
+  .report { max-width:none; }
+  .page { box-shadow:none; border-radius:0; border:0; margin:0; min-height:auto; padding:0; }
+  h1 { font-size:38px; } h2 { font-size:22px; } h3 { font-size:15px; }
+  .lead { font-size:16px; }
+  .cover { min-height:265mm; padding:20mm 16mm; }
+  .cover-grid { grid-template-columns:repeat(4,1fr); }
+  .grid3 { grid-template-columns:repeat(3,1fr); } .grid2 { grid-template-columns:1fr 1fr; }
+  .flow { grid-template-columns:1fr 1fr; }
+  .page:not(.cover) { padding:0 2mm; }
+  .card,.module,.actor,.timeline .item,table { break-inside:avoid; page-break-inside:avoid; }
+  * { -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+}
+</style>
+</head>
+<body>
+<div class="report">
+  <section class="page cover">
+    <div>
+      <div class="kicker">交付包评估报告</div>
+      <h1>航空订票系统<br>业务版评估报告</h1>
+      <p class="lead">这份报告不讲代码细节，重点回答四个问题：这个包是什么、业务上能跑到哪一步、哪些地方不能直接上线、下一步怎么处理。</p>
+      <div class="cover-grid">
+        <div class="cover-stat"><span>交付包大小</span><b>1.0 GB</b></div>
+        <div class="cover-stat"><span>解压后约</span><b>2.2 GB</b></div>
+        <div class="cover-stat"><span>业务应用</span><b>订票系统</b></div>
+        <div class="cover-stat"><span>判断</span><b>演示可用</b></div>
+      </div>
+      <div class="toc">
+        <div><b>1. 业务结论</b><span>适合演示，不适合直接上线</span></div>
+        <div><b>2. 业务模式</b><span>浏览、下单、余额支付、退款</span></div>
+        <div><b>3. 风险影响</b><span>用业务语言解释问题</span></div>
+        <div><b>4. 改造路线</b><span>先清理，再加固，再上线</span></div>
+      </div>
+    </div>
+    <p class="footer-note" style="color:#c8d9ff">生成日期：2026-07-02。分析对象：hangkong.zip / hangbandingpiao。</p>
+  </section>
+
+  <section class="page">
+    <h2>先说结论</h2>
+    <div class="verdict">
+      <p class="quote"><strong>这是一套能本地演示的航空订票系统。</strong>它可以跑通用户浏览航班、注册登录、充值余额、下单、支付、退款、留言和后台管理这些动作。但它现在更像“课程/演示交付包”，不是可以直接放到公网卖票的系统。</p>
+    </div>
+    <div class="grid3">
+      <div class="card blue"><div class="big">能演示</div><p class="sub">前台、后台、订单和余额流程都有。</p></div>
+      <div class="card amber"><div class="big">要改造</div><p class="sub">支付、退款、实名、库存和权限还不够业务化。</p></div>
+      <div class="card green"><div class="big">可交接</div><p class="sub">包里有 WAR、SQL、Tomcat、MySQL 和启动脚本。</p></div>
+    </div>
+    <h2 style="margin-top:30px">这套系统到底是什么</h2>
+    <div class="grid2">
+      <div class="card"><h3>业务上</h3><p>它是一套航空订票演示系统。用户可以看航班、下订单、支付、退款，也能收藏航班和留言。管理员可以维护航班、用户、订单、新闻和页面配置。</p></div>
+      <div class="card"><h3>交付上</h3><p>它是一个 Windows 本地运行包。打开 start.bat 后，会准备 JDK、MySQL、Tomcat，导入数据库，再启动网站。</p></div>
+    </div>
+    <h2 style="margin-top:30px">一句话给老板看</h2>
+    <p class="quote">“这个系统可以作为航空订票业务原型或验收演示使用；如果要给真实用户使用，需要先补真实支付、订单规则、数据安全和运维部署。”</p>
+  </section>
+
+  <section class="page">
+    <h2>业务模式怎么跑</h2>
+    <p class="sub">下面按业务方能理解的方式拆开，不按代码目录讲。</p>
+    <div class="grid3" style="margin-top:16px"><div class="actor"><h3>游客</h3><p>未登录访问者</p><ul><li>浏览前台首页、新闻、航班列表与详情</li><li>注册用户账号</li><li>查看公开配置和字典数据</li></ul></div><div class="actor"><h3>注册用户</h3><p>乘客/消费者</p><ul><li>登录个人中心</li><li>维护个人资料</li><li>充值余额</li><li>收藏航班</li><li>发布航班留言</li><li>创建订票订单</li><li>支付未支付订单</li><li>申请/执行退款</li><li>查看我的订单</li></ul></div><div class="actor"><h3>管理员</h3><p>平台运营方</p><ul><li>管理用户与管理员账号</li><li>维护航班基础信息、票价、图片和详情</li><li>维护新闻、轮播配置、字典项</li><li>查看和编辑订单、收藏、留言</li><li>处理后台数据增删改查</li></ul></div></div>
+    <h2 style="margin-top:28px">用户交易链路</h2>
+    <ol class="flow"><li><span>1</span><p>游客访问首页/航班/新闻</p></li><li><span>2</span><p>注册或登录用户账号</p></li><li><span>3</span><p>浏览航班详情并收藏或留言</p></li><li><span>4</span><p>选择航班和订票日期生成未支付订单</p></li><li><span>5</span><p>余额不足时先充值，充值仅在本系统内增加余额字段</p></li><li><span>6</span><p>支付订单：扣减用户余额并变更为已支付</p></li><li><span>7</span><p>退款订单：返还余额并变更为退款状态</p></li><li><span>8</span><p>管理员在后台维护航班、用户、订单、留言和新闻</p></li></ol>
+  </section>
+
+  <section class="page">
+    <h2>系统具备的业务能力</h2>
+    <div class="grid3"><div class="module"><b>航班供给</b><p>feiji 表维护航班号、飞机类型、起飞时间、始发站、目的地、票价、图片和详情；前台以列表/详情页展示。</p></div><div class="module"><b>用户账户</b><p>yonghu 表保存账户、密码、姓名、手机号、身份证号、余额、性别、头像；users 表为管理员。</p></div><div class="module"><b>订单交易</b><p>feiji_order 表记录航班、用户、订票日期、订单状态、创建时间；状态字典为未支付、已支付、退款。</p></div><div class="module"><b>余额支付</b><p>充值页把输入金额累加到用户 newMoney；订单支付会校验余额和订单归属，余额不足返回“余额不够支付”，支付后订单状态变为已支付。</p></div><div class="module"><b>退款闭环</b><p>退款接口校验订单归属，退款成功后订单进入退款状态，并把航班票价返还到用户余额。</p></div><div class="module"><b>内容与互动</b><p>news 管理新闻资讯；feiji_collection 做收藏；feiji_liuyan 做留言与后台回复；config 做轮播图等页面配置。</p></div></div>
+    <h2 style="margin-top:28px">支付模式怎么理解</h2>
+    <div class="grid2">
+      <div class="card blue"><h3>现在的逻辑</h3><p>页面展示微信、支付宝和银行支付方式，但代码实际是把充值金额直接加到用户余额里。订单支付时，再从余额里扣票价。</p></div>
+      <div class="card amber"><h3>业务含义</h3><p>这叫模拟支付。做演示够用，但不能拿来收真实的钱，因为没有支付流水、回调验签、对账和异常处理。</p></div>
+    </div>
+  </section>
+
+  <section class="page">
+    <h2>不能直接上线的原因</h2>
+    <table>
+      <thead><tr><th style="width:20%">问题</th><th>业务影响</th><th style="width:28%">建议处理</th></tr></thead>
+      <tbody><tr><td>默认账号和密码</td><td>系统里能看到 root/root、admin/123456 这类默认口令。演示没问题，放到共享环境就容易被别人登录。</td><td>先改密码，再把数据库账号放到外部配置里。</td></tr><tr><td>支付只是模拟</td><td>充值页面写了微信、支付宝和银行，但代码实际是直接增加用户余额，没有真实支付回调，也没有对账。</td><td>如果要上线，必须接支付网关、支付流水和回调验签。</td></tr><tr><td>订单不像真实机票</td><td>现在能下单、支付、退款，但没有座位库存、乘机人、实名校验、舱位和退改规则。</td><td>把它当演示闭环，不要当真实票务系统。</td></tr><tr><td>用户信息比较敏感</td><td>用户表里有手机号、身份证号、余额。报告和日志里也能看到类似字段。</td><td>真实数据要脱敏，库里敏感字段要加密或至少限制访问。</td></tr><tr><td>运行包太重</td><td>一个 zip 里放了 JDK、MySQL、Tomcat、数据库文件、日志和 WAR，解压后约 2.2 GB。</td><td>交付时拆成应用包、数据库脚本和部署说明。</td></tr><tr><td>技术栈偏旧</td><td>Tomcat 8.0.51、JDK 8u141、Spring 5.0.0、Fastjson 1.2.8、Log4j 1.x 都偏老。</td><td>演示可以，长期维护要升级依赖。</td></tr></tbody>
+    </table>
+  </section>
+
+  <section class="page">
+    <h2>建议怎么改</h2>
+    <div class="timeline">
+      <div class="item"><b>第 1 步<br>先清包</b><div>把应用包、数据库脚本、运行环境、日志和 MySQL data 分开。保留一个清晰的 README，告诉别人怎么启动、账号是什么、怎么停服务。</div></div>
+      <div class="item"><b>第 2 步<br>先安全</b><div>改掉默认密码，删除 Tomcat 示例应用，关闭 AJP 或只允许本机访问。把数据库连接放到外部配置，不要写在包里。</div></div>
+      <div class="item"><b>第 3 步<br>补业务</b><div>如果要做真实订票，先补乘机人、实名校验、座位/库存、支付流水、退款审核和订单状态流转。</div></div>
+      <div class="item"><b>第 4 步<br>再上线</b><div>升级旧组件，做依赖漏洞扫描，配置备份、日志脱敏、监控和回滚方案。上线前再做一次完整验收。</div></div>
+    </div>
+    <h2 style="margin-top:28px">建议定位</h2>
+    <div class="grid3">
+      <div class="card green"><h3>适合</h3><p>课程作业、原型展示、内部演示、功能验收。</p></div>
+      <div class="card amber"><h3>谨慎</h3><p>局域网试用、客户演示、二次开发起点。</p></div>
+      <div class="card"><h3>不建议</h3><p>直接放公网、处理真实身份证和真实支付。</p></div>
+    </div>
+  </section>
+
+  <section class="page">
+    <h2>给对方看的交付说明</h2>
+    <div class="card blue">
+      <h3>交付内容</h3>
+      <p>压缩包里包含业务应用、数据库脚本、启动脚本和运行环境。目标是在 Windows 机器上快速启动一个航空订票演示系统。</p>
+    </div>
+    <div class="grid2" style="margin-top:16px">
+      <div class="card"><h3>访问入口</h3><p>启动后访问：<br><span class="badge">http://localhost:8080/hangbandingpiao/front/pages/login/login.jsp</span></p></div>
+      <div class="card"><h3>运行环境</h3><p>Apache Tomcat 8.0.51<br>Oracle JDK 1.8.0_141-b15<br>MySQL 端口 3366，Tomcat 端口 8080。</p></div>
+    </div>
+    <h2 style="margin-top:28px">如果只是演示</h2>
+    <p>可以按 start.bat 启动，重点展示首页、航班列表、用户注册、充值、订票、支付、退款和后台管理。</p>
+    <h2 style="margin-top:22px">如果要继续开发</h2>
+    <p>建议先把这份包整理成标准工程，再安排开发。不要在现在这个运行快照上直接堆功能。</p>
+  </section>
+
+  <section class="page">
+    <h2>技术附录，给研发或实施看</h2>
+    <div class="grid2">
+      <div class="card"><h3>包体概况</h3><p>文件数：4168；目录数：685；主要类型：.jar 833, .js 397, .html 308, .gif 298, .xml 289, .png 218, .class 212, .dll 197。</p></div>
+      <div class="card"><h3>数据库</h3><p>库名 hangbandingpiao，共 10 张业务表。SQL 里带有初始化数据。</p></div>
+    </div>
+    <h3 style="margin-top:20px">主要业务表</h3>
+    <table><thead><tr><th>表</th><th>含义</th><th>字段数</th><th>样例行</th></tr></thead><tbody><tr><td>config</td><td>配置文件</td><td>3</td><td>3</td></tr><tr><td>dictionary</td><td>字典表</td><td>7</td><td>15</td></tr><tr><td>feiji</td><td>航班</td><td>11</td><td>5</td></tr><tr><td>feiji_collection</td><td>飞机收藏</td><td>5</td><td>2</td></tr><tr><td>feiji_liuyan</td><td>飞机留言</td><td>7</td><td>2</td></tr><tr><td>feiji_order</td><td>飞机订单</td><td>7</td><td>5</td></tr><tr><td>news</td><td>新闻</td><td>7</td><td>2</td></tr><tr><td>token</td><td>token表</td><td>8</td><td>4</td></tr><tr><td>users</td><td>管理员表</td><td>5</td><td>1</td></tr><tr><td>yonghu</td><td>用户</td><td>10</td><td>4</td></tr></tbody></table>
+  </section>
+
+  <section class="page">
+    <h2>技术附录，重点依赖和大文件</h2>
+    <div class="grid2">
+      <div>
+        <h3>需要关注的依赖</h3>
+        <table><thead><tr><th>组件</th><th>版本</th><th>来源</th></tr></thead><tbody><tr><td>spring-core</td><td>5.0.0.RELEASE</td><td>org.springframework</td></tr><tr><td>spring-context</td><td>5.0.0.RELEASE</td><td>org.springframework</td></tr><tr><td>spring-context-support</td><td>5.0.0.RELEASE</td><td>org.springframework</td></tr><tr><td>spring-tx</td><td>5.0.0.RELEASE</td><td>org.springframework</td></tr><tr><td>spring-aop</td><td>5.0.0.RELEASE</td><td>org.springframework</td></tr><tr><td>spring-beans</td><td>5.0.0.RELEASE</td><td>org.springframework</td></tr><tr><td>spring-jdbc</td><td>5.0.0.RELEASE</td><td>org.springframework</td></tr><tr><td>spring-web</td><td>5.0.0.RELEASE</td><td>org.springframework</td></tr><tr><td>spring-webmvc</td><td>5.0.0.RELEASE</td><td>org.springframework</td></tr><tr><td>commons-fileupload</td><td>1.3.1</td><td>commons-fileupload</td></tr><tr><td>druid</td><td>1.1.0</td><td>com.alibaba</td></tr><tr><td>fastjson</td><td>1.2.8</td><td>com.alibaba</td></tr><tr><td>log4j</td><td>1.2.17</td><td>log4j</td></tr><tr><td>spring-test</td><td>5.0.0.RELEASE</td><td>org.springframework</td></tr><tr><td>commons-beanutils</td><td>1.8.0</td><td>commons-beanutils</td></tr><tr><td>jackson-databind</td><td>2.10.1</td><td>com.fasterxml.jackson.core</td></tr><tr><td>poi-ooxml</td><td>3.11-beta2</td><td>org.apache.poi</td></tr></tbody></table>
+      </div>
+      <div>
+        <h3>最大文件</h3>
+        <table><thead><tr><th>路径</th><th>大小</th></tr></thead><tbody><tr><td>hangkong/hangkong_run/environment/mysql-8.0.13-winx64/bin/mysqld.pdb</td><td>392.7 MB</td></tr><tr><td>hangkong/environment/jdk1.8.0_141.zip</td><td>238.7 MB</td></tr><tr><td>hangkong/environment/mysql-8.0.13-winx64.zip</td><td>192.3 MB</td></tr><tr><td>hangkong/hangkong_run/environment/jdk1.8.0_141/jre/lib/rt.jar</td><td>60.5 MB</td></tr><tr><td>hangkong/hangkong_run/environment/mysql-8.0.13-winx64/lib/mysqlclient.lib</td><td>58.5 MB</td></tr><tr><td>hangkong/hangbandingpiao.war</td><td>52.4 MB</td></tr><tr><td>hangkong/hangkong_run/environment/apache-tomcat-v8.0.51/webapps/hangbandingpiao.war</td><td>52.4 MB</td></tr><tr><td>hangkong/hangkong_run/environment/jre1.8.0_141/lib/rt.jar</td><td>52.0 MB</td></tr></tbody></table>
+      </div>
+    </div>
+    <h3 style="margin-top:20px">参考</h3>
+    <ul class="print-link"><li><a href="https://tomcat.apache.org/tomcat-80-eol.html">Apache Tomcat 8.0.x EOL announcement</a></li><li><a href="https://tomcat.apache.org/whichversion.html">Apache Tomcat Which Version</a></li></ul>
+  </section>
+</div>
+</body>
+</html>

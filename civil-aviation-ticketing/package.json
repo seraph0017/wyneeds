@@ -1,0 +1,81 @@
+{
+  "name": "civil-aviation-ticketing",
+  "version": "1.0.3",
+  "private": true,
+  "description": "民航客票销售订座教学实训系统，支持 Web 与 Windows 桌面应用。",
+  "type": "module",
+  "main": "dist-node/electron/main.cjs",
+  "scripts": {
+    "dev": "concurrently -k -n API,WEB -c blue,green \"npm:server:dev\" \"vite --host 127.0.0.1 --port 5173\"",
+    "server:dev": "tsx watch server/standalone.ts",
+    "server:start": "node dist-node/server/standalone.cjs",
+    "test": "vitest run",
+    "build": "vite build && node scripts/build-node.mjs",
+    "typecheck": "tsc --noEmit && tsc -p tsconfig.node.json --noEmit",
+    "electron:dev": "npm run build && electron .",
+    "electron:build": "npm run build && electron-builder",
+    "dist:win": "npm run build && electron-builder --win portable --x64",
+    "dist:win:arm64": "npm run build && electron-builder --win portable --arm64"
+  },
+  "dependencies": {
+    "cors": "2.8.5",
+    "express": "^4.22.2",
+    "express-rate-limit": "7.5.0",
+    "helmet": "7.2.0",
+    "react": "18.3.1",
+    "react-dom": "18.3.1"
+  },
+  "devDependencies": {
+    "@types/cors": "2.8.17",
+    "@types/express": "4.17.21",
+    "@types/node": "20.17.10",
+    "@types/react": "18.3.12",
+    "@types/react-dom": "18.3.1",
+    "@vitejs/plugin-react": "4.3.4",
+    "concurrently": "9.1.0",
+    "electron": "^41.7.1",
+    "electron-builder": "25.1.8",
+    "esbuild": "0.24.2",
+    "tsx": "4.19.2",
+    "typescript": "5.6.3",
+    "vite": "5.4.11",
+    "vitest": "2.1.8"
+  },
+  "build": {
+    "appId": "cn.training.civil-aviation-ticketing",
+    "productName": "民航客票销售订座系统",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "dist/**/*",
+      "dist-node/**/*",
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": "build/icon.png",
+        "to": "icon.png"
+      }
+    ],
+    "asar": true,
+    "win": {
+      "icon": "build/icon.ico",
+      "target": [
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "artifactName": "民航客票销售订座系统-${version}-${arch}.${ext}"
+    },
+    "mac": {
+      "target": "dir"
+    }
+  },
+  "overrides": {
+    "path-to-regexp": "0.1.13"
+  }
+}

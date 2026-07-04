@@ -1,0 +1,28 @@
+# macOS / editor noise
+.DS_Store
+*.log
+
+# Node / build output
+node_modules/
+**/node_modules/
+civil-aviation-ticketing/dist/
+civil-aviation-ticketing/dist-node/
+civil-aviation-ticketing/.playwright-cli/
+civil-aviation-ticketing/.local-data/
+
+# Local env / secrets
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+
+# Large local reference / temp artifacts; keep reports and source in git instead.
+hangkong.zip
+.analysis_tmp/
+tmp/
+
+# Electron build folders and old installers. Keep only latest portable deliverables.
+civil-aviation-ticketing/release/*
+!civil-aviation-ticketing/release/民航客票销售订座系统-1.0.3-x64.exe
+!civil-aviation-ticketing/release/民航客票销售订座系统-1.0.3-arm64.exe
