@@ -9,11 +9,18 @@ import { validateFlightSearch, validateOrderRequest } from '../src/domain/valida
 import type { BookingRequest, CabinClass, ContactInput, DocumentType, Flight, Gender, OrderRecord, PassengerInput, PassengerType } from '../src/domain/types';
 import { calculatePassengerFare } from '../src/domain/pricing';
 import { OrderStore, resolveDataFile } from './orderStore';
+import { LicenseManager } from './license/manager';
+import type { LicenseEnvelope } from './license/types';
 
 export interface ServerOptions {
   port?: number;
   dataDir?: string;
   enableCors?: boolean;
+  licenseRequired?: boolean;
+  licensePublicKeyPem?: string;
+  licenseDeviceHash?: string;
+  licenseActivationUrl?: string;
+  licenseAppVersion?: string;
 }
 
 const cabinClasses: CabinClass[] = ['first', 'business', 'economy'];
@@ -160,6 +167,14 @@ function deriveBookingRequest(body: unknown, orders: OrderRecord[]): { request?:
 export function createApp(options: ServerOptions = {}) {
   const app = express();
   const store = new OrderStore(resolveDataFile(options.dataDir));
+  const licenseRequired = options.licenseRequired ?? process.env.CA_LICENSE_REQUIRED === 'true';
+  const licenseManager = licenseRequired ? new LicenseManager({
+    dataDir: options.dataDir,
+    publicKeyPem: options.licensePublicKeyPem ?? process.env.CA_LICENSE_PUBLIC_KEY_PEM ?? '',
+    deviceHash: options.licenseDeviceHash,
+    activationServerUrl: options.licenseActivationUrl ?? process.env.CA_LICENSE_SERVER_URL,
+    appVersion: options.licenseAppVersion ?? process.env.npm_package_version,
+  }) : undefined;
 
   app.disable('x-powered-by');
   app.use(helmet({ contentSecurityPolicy: false }));
@@ -177,6 +192,65 @@ export function createApp(options: ServerOptions = {}) {
   app.use('/api', rateLimit({ windowMs: 15 * 60 * 1000, max: 600, standardHeaders: true, legacyHeaders: false }));
 
   app.get('/api/health', (_req, res) => res.json({ ok: true, service: 'civil-aviation-ticketing' }));
+  app.get('/api/license/status', async (_req, res, next) => {
+    try {
+      if (!licenseManager) {
+        return res.json({
+          licensed: true,
+          activationRequired: false,
+          activationServerConfigured: false,
+          deviceHash: '',
+          deviceDisplayCode: 'DEV-MODE',
+          summary: {
+            licenseId: 'DEV-MODE',
+            customerName: '开发模式',
+            expiresAt: '2099-12-31',
+            features: ['ticketing', 'training', 'desktop'],
+            deviceHash: '',
+            deviceDisplayCode: 'DEV-MODE',
+            offlineGraceDays: 0,
+          },
+        });
+      }
+      return res.json(await licenseManager.status());
+    } catch (error) { return next(error); }
+  });
+  app.post('/api/license/activate', async (req, res, next) => {
+    try {
+      if (!licenseManager) return res.status(409).json({ code: 'LICENSE_DISABLED', message: '当前未启用授权校验' });
+      const inviteCode = stringValue(req.body?.inviteCode);
+      if (!inviteCode) return res.status(422).json({ code: 'INVALID_REQUEST', message: '请输入邀请码' });
+      const result = await licenseManager.activate(inviteCode);
+      return res.status(result.licensed ? 200 : 422).json(result);
+    } catch (error) { return next(error); }
+  });
+  app.post('/api/license/offline-import', async (req, res, next) => {
+    try {
+      if (!licenseManager) return res.status(409).json({ code: 'LICENSE_DISABLED', message: '当前未启用授权校验' });
+      const envelope = isRecord(req.body) && isRecord(req.body.envelope) ? req.body.envelope as unknown as LicenseEnvelope : undefined;
+      if (!envelope) return res.status(422).json({ code: 'INVALID_REQUEST', message: '授权文件格式不正确' });
+      const result = await licenseManager.importOffline(envelope);
+      return res.status(result.licensed ? 200 : 422).json(result);
+    } catch (error) { return next(error); }
+  });
+
+  if (licenseManager) {
+    app.use('/api', async (req, res, next) => {
+      if (req.path === '/health' || req.path.startsWith('/license/')) return next();
+      try {
+        const status = await licenseManager.status();
+        if (!status.licensed) {
+          return res.status(403).json({
+            code: 'LICENSE_REQUIRED',
+            errors: ['软件未授权，请先输入邀请码完成激活'],
+            license: status,
+          });
+        }
+        return next();
+      } catch (error) { return next(error); }
+    });
+  }
+
   app.get('/api/cities', (_req, res) => res.json(cities));
   app.get('/api/rules', (_req, res) => res.json(rules));
 
