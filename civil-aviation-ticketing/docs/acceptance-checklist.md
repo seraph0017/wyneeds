@@ -22,5 +22,5 @@
 | Loading/Error | 加载和错误提示 | Pass | `notice`、`loading` 状态 |
 | 二次确认 | 关键操作确认 | Pass | `window.confirm` |
 | Windows桌面 | Electron 打包 x64/arm64 exe，配置自定义图标 | Pass | `release/民航客票销售订座系统-1.1.0-x64.exe`、`release/民航客票销售订座系统-1.1.0-arm64.exe` |
-| 测试 | 核心领域规则、API、机场/航线数据测试 | Pass | `npm test` 55 tests |
+| 测试 | 核心领域规则、API、机场/航线数据测试 | Pass | `npm test` 57 tests |
 | 安全审计 | 生产依赖 audit 无 high/critical | Pass | `npm audit --omit=dev --audit-level=high` 通过；dev/build 链风险见 data/security review |

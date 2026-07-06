@@ -32,6 +32,7 @@ async function postJson<T>(url: string, body: unknown, timeoutMs: number): Promi
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body),
+      redirect: 'error',
       signal: controller.signal,
     });
     const payload = await response.json().catch(() => ({}));

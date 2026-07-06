@@ -13,6 +13,7 @@ import { LicenseManager } from './license/manager';
 import type { LicenseActivationResponse } from './license/manager';
 import type { LicenseEnvelope } from './license/types';
 import { DEFAULT_LICENSE_PUBLIC_KEY_PEM } from './license/publicKey';
+import { normalizeActivationServerUrl } from './license/config';
 
 export interface ServerOptions {
   port?: number;
@@ -182,7 +183,7 @@ export function createApp(options: ServerOptions = {}) {
     dataDir: options.dataDir,
     publicKeyPem: options.licensePublicKeyPem ?? DEFAULT_LICENSE_PUBLIC_KEY_PEM,
     deviceHash: options.licenseDeviceHash,
-    activationServerUrl: options.licenseActivationUrl ?? process.env.CA_LICENSE_SERVER_URL,
+    activationServerUrl: normalizeActivationServerUrl(options.licenseActivationUrl ?? process.env.CA_LICENSE_SERVER_URL),
     appVersion: options.licenseAppVersion ?? process.env.npm_package_version,
   }) : undefined;
 

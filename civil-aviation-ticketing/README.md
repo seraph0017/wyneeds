@@ -51,7 +51,7 @@ npm audit --omit=dev --audit-level=high
 
 2026-07-06 验收结果：
 
-- `npm test`：55 个测试通过。
+- `npm test`：57 个测试通过。
 - `npm run typecheck`：通过。
 - `npm run build`：通过。
 - `npm audit --omit=dev --audit-level=high`：`found 0 vulnerabilities`。
