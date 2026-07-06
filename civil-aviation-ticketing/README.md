@@ -49,7 +49,7 @@ npm run build
 npm audit --omit=dev --audit-level=high
 ```
 
-2026-07-06 验收结果：
+2026-07-07 验收结果：
 
 - `npm test`：57 个测试通过。
 - `npm run typecheck`：通过。
