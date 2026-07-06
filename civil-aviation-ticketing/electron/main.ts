@@ -7,7 +7,14 @@ let closeServer: (() => Promise<void>) | undefined;
 async function createWindow() {
   session.defaultSession.setPermissionRequestHandler((_webContents, _permission, callback) => callback(false));
   const dataDir = app.getPath('userData');
-  const server = await startServer({ port: 0, dataDir, enableCors: true });
+  const server = await startServer({
+    port: 0,
+    dataDir,
+    enableCors: true,
+    licenseRequired: true,
+    licenseActivationUrl: process.env.CA_LICENSE_SERVER_URL,
+    licenseAppVersion: app.getVersion(),
+  });
   closeServer = server.close;
   const windowIcon = app.isPackaged
     ? path.join(process.resourcesPath, 'icon.png')

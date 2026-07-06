@@ -22,6 +22,11 @@ hangkong.zip
 .analysis_tmp/
 tmp/
 
+
+# Local license server secrets / invite DB
+civil-aviation-ticketing/secrets/
+civil-aviation-ticketing/.license-server/
+
 # Electron build folders and old installers. Keep only latest portable deliverables.
 civil-aviation-ticketing/release/*
 !civil-aviation-ticketing/release/民航客票销售订座系统-1.0.3-x64.exe

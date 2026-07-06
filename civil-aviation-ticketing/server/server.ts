@@ -11,6 +11,7 @@ import { calculatePassengerFare } from '../src/domain/pricing';
 import { OrderStore, resolveDataFile } from './orderStore';
 import { LicenseManager } from './license/manager';
 import type { LicenseEnvelope } from './license/types';
+import { DEFAULT_LICENSE_PUBLIC_KEY_PEM } from './license/publicKey';
 
 export interface ServerOptions {
   port?: number;
@@ -170,7 +171,7 @@ export function createApp(options: ServerOptions = {}) {
   const licenseRequired = options.licenseRequired ?? process.env.CA_LICENSE_REQUIRED === 'true';
   const licenseManager = licenseRequired ? new LicenseManager({
     dataDir: options.dataDir,
-    publicKeyPem: options.licensePublicKeyPem ?? process.env.CA_LICENSE_PUBLIC_KEY_PEM ?? '',
+    publicKeyPem: options.licensePublicKeyPem ?? process.env.CA_LICENSE_PUBLIC_KEY_PEM ?? DEFAULT_LICENSE_PUBLIC_KEY_PEM,
     deviceHash: options.licenseDeviceHash,
     activationServerUrl: options.licenseActivationUrl ?? process.env.CA_LICENSE_SERVER_URL,
     appVersion: options.licenseAppVersion ?? process.env.npm_package_version,
