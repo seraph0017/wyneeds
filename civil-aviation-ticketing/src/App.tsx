@@ -7,6 +7,30 @@ import { calculatePassengerFare, cabinName } from './domain/pricing';
 type SortKey = 'timeAsc' | 'timeDesc' | 'priceAsc' | 'priceDesc' | 'duration';
 type Step = 'search' | 'flights' | 'booking' | 'success' | 'orders' | 'rules';
 
+type LicenseFeature = 'ticketing' | 'training' | 'desktop';
+
+interface LicenseSummary {
+  licenseId: string;
+  customerName: string;
+  expiresAt: string;
+  features: LicenseFeature[];
+  deviceHash: string;
+  deviceDisplayCode: string;
+  offlineGraceDays: number;
+}
+
+interface LicenseStatusResponse {
+  licensed: boolean;
+  reason?: string;
+  message?: string;
+  deviceHash: string;
+  deviceDisplayCode: string;
+  summary?: LicenseSummary;
+  activationRequired: boolean;
+  activationServerConfigured: boolean;
+  remoteReused?: boolean;
+}
+
 const apiPort = new URLSearchParams(window.location.search).get('apiPort');
 const apiBase = apiPort ? `http://127.0.0.1:${apiPort}` : '';
 const today = new Date().toISOString().slice(0, 10);
@@ -83,6 +107,20 @@ async function getJson<T>(url: string): Promise<T> {
   return res.json() as Promise<T>;
 }
 
+async function postJson<T>(url: string, body: unknown): Promise<T> {
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const message = (data as { message?: string; errors?: string[] }).message ?? (data as { errors?: string[] }).errors?.join('；') ?? `请求失败：${res.status}`;
+    throw new Error(message);
+  }
+  return data as T;
+}
+
 function CitySearchInput({ label, value, cities, onChange, error }: { label: string; value: string; cities: City[]; onChange: (code: string) => void; error?: string }) {
   const selected = cities.find((city) => city.code === value);
   const [query, setQuery] = useState(formatCity(selected));
@@ -147,6 +185,58 @@ function FieldHint({ error, help }: { error?: string; help?: string }) {
   return null;
 }
 
+function LicenseGate({ status, busy, onActivate }: { status: LicenseStatusResponse | null; busy: boolean; onActivate: (inviteCode: string) => Promise<void> }) {
+  const [inviteCode, setInviteCode] = useState('');
+  const [error, setError] = useState('');
+
+  async function submit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setError('');
+    try {
+      await onActivate(inviteCode);
+    } catch (activationError) {
+      setError(activationError instanceof Error ? activationError.message : '激活失败，请稍后重试');
+    }
+  }
+
+  return (
+    <main className="app-shell license-shell">
+      <section className="license-card" aria-labelledby="license-title">
+        <div className="license-mark">CA</div>
+        <div className="license-copy">
+          <p className="eyebrow">ToB 授权激活</p>
+          <h1 id="license-title">民航客票销售订座系统</h1>
+          <p>首次使用需要联网输入邀请码完成设备绑定。激活后授权文件保存在本机，后续可尽量离线使用。</p>
+        </div>
+
+        <div className="license-status-grid">
+          <div><span>本机设备码</span><b>{status?.deviceDisplayCode ?? '读取中...'}</b></div>
+          <div><span>授权状态</span><b>{status?.licensed ? '已授权' : '待激活'}</b></div>
+          <div><span>授权服务器</span><b>{status?.activationServerConfigured ? '已配置' : '未配置'}</b></div>
+        </div>
+
+        {status?.message && <div className="license-warning" role="status">{status.message}</div>}
+        {!status?.activationServerConfigured && <div className="license-warning" role="status">当前未配置授权服务器地址。部署正式域名后设置 CA_LICENSE_SERVER_URL，即可使用邀请码在线激活。</div>}
+
+        <form className="license-form" onSubmit={submit}>
+          <label className="field">授权邀请码
+            <input value={inviteCode} onChange={(event) => setInviteCode(event.target.value.toUpperCase())} placeholder="例如 WY-2026-ABCD-EFGH" autoFocus aria-describedby="license-help" />
+          </label>
+          <small id="license-help" className="field-help">邀请码由供应商后台生成，可限制客户、有效期和可绑定设备数。</small>
+          {error && <div className="error-list" role="alert"><p>{error}</p></div>}
+          <button className="primary full" type="submit" disabled={busy || !inviteCode.trim() || !status?.activationServerConfigured}>
+            {busy ? '正在激活...' : '激活并进入系统'}
+          </button>
+        </form>
+
+        <div className="license-footnote">
+          <b>说明</b>：本软件是教学/实训模拟版，不连接真实航司、真实支付或真实票务。复制 exe 到其他电脑后仍需重新授权。
+        </div>
+      </section>
+    </main>
+  );
+}
+
 function App() {
   const [cities, setCities] = useState<City[]>([]);
   const [citiesLoading, setCitiesLoading] = useState(true);
@@ -162,15 +252,57 @@ function App() {
   const [passengers, setPassengers] = useState<PassengerInput[]>([emptyPassenger('adult', 1)]);
   const [contact, setContact] = useState({ name: '订票老师', phone: '13900139000', email: 'teacher@example.com' });
   const [lastOrder, setLastOrder] = useState<OrderRecord | null>(null);
+  const [licenseStatus, setLicenseStatus] = useState<LicenseStatusResponse | null>(null);
+  const [licenseChecking, setLicenseChecking] = useState(true);
+  const [licenseBusy, setLicenseBusy] = useState(false);
 
   useEffect(() => {
+    refreshLicenseStatus();
+  }, []);
+
+  useEffect(() => {
+    if (licenseStatus?.licensed) loadInitialData();
+  }, [licenseStatus?.licensed]);
+
+  async function refreshLicenseStatus() {
+    setLicenseChecking(true);
+    try {
+      setLicenseStatus(await getJson<LicenseStatusResponse>(`${apiBase}/api/license/status`));
+    } catch {
+      setLicenseStatus({
+        licensed: false,
+        activationRequired: true,
+        activationServerConfigured: false,
+        deviceHash: '',
+        deviceDisplayCode: 'UNKNOWN',
+        message: '授权状态读取失败，请重启软件或联系供应商',
+      });
+    } finally {
+      setLicenseChecking(false);
+    }
+  }
+
+  async function activateLicense(inviteCode: string) {
+    setLicenseBusy(true);
+    try {
+      const result = await postJson<LicenseStatusResponse>(`${apiBase}/api/license/activate`, { inviteCode });
+      if (!result.licensed) throw new Error(result.message || '激活失败');
+      setLicenseStatus(result);
+      setNotice(`授权成功：${result.summary?.customerName ?? '授权客户'}，有效期至 ${result.summary?.expiresAt ?? '授权到期日'}`);
+    } finally {
+      setLicenseBusy(false);
+    }
+  }
+
+  async function loadInitialData() {
+    setCitiesLoading(true);
     getJson<City[]>(`${apiBase}/api/cities`)
       .then(setCities)
       .catch(() => setNotice('城市数据加载失败'))
       .finally(() => setCitiesLoading(false));
     getJson<typeof rules>(`${apiBase}/api/rules`).then(setRules).catch(() => undefined);
     refreshOrders();
-  }, []);
+  }
 
   async function refreshOrders() {
     try { setOrders(await getJson<OrderRecord[]>(`${apiBase}/api/orders`)); } catch { setOrders([]); }
@@ -351,6 +483,14 @@ function App() {
   const requestErrors = request ? validateOrderRequest(request) : [];
   const contactErrors = validateContact(contact);
   const totalAmount = request ? passengers.reduce((sum, item) => sum + calculatePassengerFare(request.baseFare, item.type), 0) : 0;
+
+  if (licenseChecking) {
+    return <main className="app-shell license-shell"><section className="license-card"><div className="skeleton-block">正在校验本机授权...</div></section></main>;
+  }
+
+  if (!licenseStatus?.licensed) {
+    return <LicenseGate status={licenseStatus} busy={licenseBusy} onActivate={activateLicense} />;
+  }
 
   return (
     <main className="app-shell">

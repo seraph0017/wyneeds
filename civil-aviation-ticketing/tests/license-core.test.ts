@@ -56,7 +56,8 @@ describe('license core', () => {
     });
 
     expect(result.valid).toBe(true);
-    expect(result.summary?.customerName).toBe('测试培训学校');
+    if (!result.valid) throw new Error(result.message);
+    expect(result.summary.customerName).toBe('测试培训学校');
   });
 
   it('rejects a license when any signed payload field is tampered', () => {
@@ -73,6 +74,7 @@ describe('license core', () => {
     });
 
     expect(result.valid).toBe(false);
+    if (result.valid) throw new Error('tampered license unexpectedly passed');
     expect(result.reason).toBe('SIGNATURE_INVALID');
   });
 
