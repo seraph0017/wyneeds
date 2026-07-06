@@ -3,7 +3,7 @@ import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { generateKeyPairSync } from 'node:crypto';
 import { afterEach, describe, expect, it } from 'vitest';
-import { signLicensePayload, verifyLicenseEnvelope } from '../server/license/crypto';
+import { signLicenseCheckReceipt, signLicensePayload, verifyLicenseCheckReceipt, verifyLicenseEnvelope } from '../server/license/crypto';
 import { createDeviceDisplayCode, hashDeviceFingerprint } from '../server/license/device';
 import { LicenseStore } from '../server/license/store';
 import { LICENSE_APP_ID, LICENSE_PRODUCT, type LicensePayload } from '../server/license/types';
@@ -121,5 +121,37 @@ describe('license core', () => {
       expectedAppId: LICENSE_APP_ID,
       expectedProduct: LICENSE_PRODUCT,
     }).valid).toBe(true);
+  });
+
+  it('accepts only fresh signed online check receipts for the expected license and device', () => {
+    const { publicKeyPem, privateKeyPem } = keys();
+    const receipt = signLicenseCheckReceipt({
+      schemaVersion: 1,
+      appId: LICENSE_APP_ID,
+      licenseId: 'LIC-TEST-001',
+      deviceHash: payload().deviceHash,
+      status: 'active',
+      message: '授权有效',
+      checkedAt: '2026-07-06T00:00:00.000Z',
+    }, privateKeyPem, 'test-key');
+
+    expect(verifyLicenseCheckReceipt(receipt, {
+      publicKeyPem,
+      expectedLicenseId: 'LIC-TEST-001',
+      expectedDeviceHash: payload().deviceHash,
+      now: new Date('2026-07-06T00:05:00.000Z'),
+    })).toMatchObject({ valid: true, status: 'active' });
+    expect(verifyLicenseCheckReceipt({ ...receipt, payload: { ...receipt.payload, status: 'revoked' } }, {
+      publicKeyPem,
+      expectedLicenseId: 'LIC-TEST-001',
+      expectedDeviceHash: payload().deviceHash,
+      now: new Date('2026-07-06T00:05:00.000Z'),
+    })).toMatchObject({ valid: false });
+    expect(verifyLicenseCheckReceipt(receipt, {
+      publicKeyPem,
+      expectedLicenseId: 'LIC-TEST-001',
+      expectedDeviceHash: payload().deviceHash,
+      now: new Date('2026-07-06T00:30:00.000Z'),
+    })).toMatchObject({ valid: false, message: '授权复核回执已过期' });
   });
 });

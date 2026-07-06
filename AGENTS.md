@@ -18,8 +18,8 @@ npm run build
 npm audit --omit=dev --audit-level=high
 npm run dist:win
 npm run dist:win:arm64
-node scripts/license-admin.mjs create-invite --customer "客户名称"
-node scripts/license-server.mjs
+npm run license:invite -- --customer "客户名称"
+npm run license:server
 ```
 
 ## 交付物
@@ -36,5 +36,5 @@ node scripts/license-server.mjs
 - `hangkong.zip`、`.analysis_tmp/` 是大体积本地参考/解包产物，不要加入 Git。
 - Windows exe 未签名；已配置自定义图标和邀请码授权门禁，正式外发前可补代码签名。
 - 授权私钥保存在本机 `civil-aviation-ticketing/secrets/license/license-private-key.pem`，不要提交；客户端只提交公钥。
-- 正式授权域名待定；当前通过 `CA_LICENSE_SERVER_URL` 指向部署后的授权服务。
+- 正式授权域名待定；开发可通过 `CA_LICENSE_SERVER_URL` 指向部署后的授权服务，portable exe 可用 exe 同目录的 `license-config.json` 配置授权服务地址。
 - dev/build 链全量 audit 可能仍有构建期风险；生产依赖审计已通过。

@@ -10,6 +10,7 @@ import type { BookingRequest, CabinClass, ContactInput, DocumentType, Flight, Ge
 import { calculatePassengerFare } from '../src/domain/pricing';
 import { OrderStore, resolveDataFile } from './orderStore';
 import { LicenseManager } from './license/manager';
+import type { LicenseActivationResponse } from './license/manager';
 import type { LicenseEnvelope } from './license/types';
 import { DEFAULT_LICENSE_PUBLIC_KEY_PEM } from './license/publicKey';
 
@@ -22,6 +23,7 @@ export interface ServerOptions {
   licenseDeviceHash?: string;
   licenseActivationUrl?: string;
   licenseAppVersion?: string;
+  apiToken?: string;
 }
 
 const cabinClasses: CabinClass[] = ['first', 'business', 'economy'];
@@ -44,6 +46,13 @@ function enumValue<T extends string>(value: unknown, allowed: readonly T[], fall
 }
 function isValidDate(value: string): boolean {
   return /^\d{4}-\d{2}-\d{2}$/.test(value) && !Number.isNaN(new Date(`${value}T00:00:00`).getTime());
+}
+
+function activationHttpStatus(result: LicenseActivationResponse): number {
+  if (result.licensed) return 200;
+  if (result.remoteStatus && result.remoteStatus >= 400 && result.remoteStatus < 500) return result.remoteStatus;
+  if (result.remoteCode === 'TIMEOUT' || result.remoteCode === 'NETWORK_ERROR' || result.remoteStatus && result.remoteStatus >= 500) return 503;
+  return 422;
 }
 
 
@@ -168,10 +177,10 @@ function deriveBookingRequest(body: unknown, orders: OrderRecord[]): { request?:
 export function createApp(options: ServerOptions = {}) {
   const app = express();
   const store = new OrderStore(resolveDataFile(options.dataDir));
-  const licenseRequired = options.licenseRequired ?? process.env.CA_LICENSE_REQUIRED === 'true';
+  const licenseRequired = options.licenseRequired ?? true;
   const licenseManager = licenseRequired ? new LicenseManager({
     dataDir: options.dataDir,
-    publicKeyPem: options.licensePublicKeyPem ?? process.env.CA_LICENSE_PUBLIC_KEY_PEM ?? DEFAULT_LICENSE_PUBLIC_KEY_PEM,
+    publicKeyPem: options.licensePublicKeyPem ?? DEFAULT_LICENSE_PUBLIC_KEY_PEM,
     deviceHash: options.licenseDeviceHash,
     activationServerUrl: options.licenseActivationUrl ?? process.env.CA_LICENSE_SERVER_URL,
     appVersion: options.licenseAppVersion ?? process.env.npm_package_version,
@@ -191,6 +200,14 @@ export function createApp(options: ServerOptions = {}) {
   }
   app.use(express.json({ limit: '200kb' }));
   app.use('/api', rateLimit({ windowMs: 15 * 60 * 1000, max: 600, standardHeaders: true, legacyHeaders: false }));
+  if (options.apiToken) {
+    app.use('/api', (req, res, next) => {
+      if (req.path === '/health') return next();
+      const token = req.get('X-CA-Session') ?? String(req.query.apiToken ?? '');
+      if (token !== options.apiToken) return res.status(403).json({ code: 'SESSION_REQUIRED', errors: ['本地会话已失效，请重启软件'] });
+      return next();
+    });
+  }
 
   app.get('/api/health', (_req, res) => res.json({ ok: true, service: 'civil-aviation-ticketing' }));
   app.get('/api/license/status', async (_req, res, next) => {
@@ -222,7 +239,7 @@ export function createApp(options: ServerOptions = {}) {
       const inviteCode = stringValue(req.body?.inviteCode);
       if (!inviteCode) return res.status(422).json({ code: 'INVALID_REQUEST', message: '请输入邀请码' });
       const result = await licenseManager.activate(inviteCode);
-      return res.status(result.licensed ? 200 : 422).json(result);
+      return res.status(activationHttpStatus(result)).json(result);
     } catch (error) { return next(error); }
   });
   app.post('/api/license/offline-import', async (req, res, next) => {

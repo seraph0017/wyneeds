@@ -6,8 +6,11 @@ import {
   LICENSE_APP_ID,
   LICENSE_PRODUCT,
   LICENSE_SCHEMA_VERSION,
+  type LicenseCheckReceipt,
+  type LicenseCheckReceiptPayload,
   type LicenseEnvelope,
   type LicensePayload,
+  type LicenseRemoteStatus,
   type LicenseValidationOptions,
   type LicenseValidationResult,
 } from './types';
@@ -18,13 +21,37 @@ function payloadBytes(payload: LicensePayload): Buffer {
 
 function parseDateEndOfDay(value: string): Date | undefined {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return undefined;
-  const parsed = new Date(`${value}T23:59:59.999Z`);
+  const [year, month, day] = value.split('-').map(Number);
+  const parsed = new Date(Date.UTC(year, month - 1, day, 23, 59, 59, 999));
+  if (
+    Number.isNaN(parsed.getTime()) ||
+    parsed.getUTCFullYear() !== year ||
+    parsed.getUTCMonth() !== month - 1 ||
+    parsed.getUTCDate() !== day
+  ) {
+    return undefined;
+  }
+  return parsed;
+}
+
+function parseIsoDateTime(value: string): Date | undefined {
+  const parsed = new Date(value);
   return Number.isNaN(parsed.getTime()) ? undefined : parsed;
 }
 
 export function signLicensePayload(payload: LicensePayload, privateKeyPem: string, keyId = DEFAULT_LICENSE_KEY_ID): LicenseEnvelope {
   const privateKey = createPrivateKey(privateKeyPem);
   const signature = sign(null, payloadBytes(payload), privateKey).toString('base64');
+  return { algorithm: 'Ed25519', keyId, payload, signature };
+}
+
+function checkReceiptBytes(payload: LicenseCheckReceiptPayload): Buffer {
+  return Buffer.from(canonicalJson(payload), 'utf8');
+}
+
+export function signLicenseCheckReceipt(payload: LicenseCheckReceiptPayload, privateKeyPem: string, keyId = DEFAULT_LICENSE_KEY_ID): LicenseCheckReceipt {
+  const privateKey = createPrivateKey(privateKeyPem);
+  const signature = sign(null, checkReceiptBytes(payload), privateKey).toString('base64');
   return { algorithm: 'Ed25519', keyId, payload, signature };
 }
 
@@ -36,6 +63,20 @@ function isLicenseEnvelope(value: unknown): value is LicenseEnvelope {
     && typeof candidate.signature === 'string'
     && typeof candidate.payload === 'object'
     && candidate.payload !== null;
+}
+
+function isLicenseCheckReceipt(value: unknown): value is LicenseCheckReceipt {
+  const candidate = value as Partial<LicenseCheckReceipt> | undefined;
+  return Boolean(candidate)
+    && candidate?.algorithm === 'Ed25519'
+    && typeof candidate.keyId === 'string'
+    && typeof candidate.signature === 'string'
+    && typeof candidate.payload === 'object'
+    && candidate.payload !== null;
+}
+
+function isRemoteStatus(value: unknown): value is LicenseRemoteStatus {
+  return value === 'active' || value === 'revoked' || value === 'expired' || value === 'unknown';
 }
 
 export function verifyLicenseEnvelope(envelope: unknown, options: LicenseValidationOptions): LicenseValidationResult {
@@ -87,6 +128,62 @@ export function verifyLicenseEnvelope(envelope: unknown, options: LicenseValidat
       deviceHash: payload.deviceHash,
       deviceDisplayCode: createDeviceDisplayCode(payload.deviceHash),
       offlineGraceDays: payload.offlineGraceDays,
+      licenseServerUrl: payload.licenseServerUrl,
     },
+  };
+}
+
+export interface LicenseCheckReceiptValidationOptions {
+  publicKeyPem: string;
+  expectedLicenseId: string;
+  expectedDeviceHash: string;
+  now?: Date;
+  maxAgeMs?: number;
+  maxFutureSkewMs?: number;
+}
+
+export type LicenseCheckReceiptValidationResult =
+  | { valid: true; status: LicenseRemoteStatus; message: string; checkedAt: string; receipt: LicenseCheckReceipt }
+  | { valid: false; message: string };
+
+export function verifyLicenseCheckReceipt(receipt: unknown, options: LicenseCheckReceiptValidationOptions): LicenseCheckReceiptValidationResult {
+  if (!isLicenseCheckReceipt(receipt)) return { valid: false, message: '授权复核回执格式不正确' };
+
+  const payload = receipt.payload;
+  if (
+    payload.schemaVersion !== LICENSE_SCHEMA_VERSION ||
+    payload.appId !== LICENSE_APP_ID ||
+    payload.licenseId !== options.expectedLicenseId ||
+    payload.deviceHash !== options.expectedDeviceHash ||
+    !isRemoteStatus(payload.status) ||
+    typeof payload.message !== 'string' ||
+    typeof payload.checkedAt !== 'string'
+  ) {
+    return { valid: false, message: '授权复核回执内容不匹配' };
+  }
+
+  let signatureValid = false;
+  try {
+    const publicKey = createPublicKey(options.publicKeyPem);
+    signatureValid = verify(null, checkReceiptBytes(payload), publicKey, Buffer.from(receipt.signature, 'base64'));
+  } catch {
+    signatureValid = false;
+  }
+  if (!signatureValid) return { valid: false, message: '授权复核回执签名校验失败' };
+
+  const checkedAt = parseIsoDateTime(payload.checkedAt);
+  if (!checkedAt) return { valid: false, message: '授权复核回执时间不正确' };
+  const now = options.now ?? new Date();
+  const maxFutureSkewMs = options.maxFutureSkewMs ?? 5 * 60 * 1000;
+  const maxAgeMs = options.maxAgeMs ?? 10 * 60 * 1000;
+  if (checkedAt.getTime() > now.getTime() + maxFutureSkewMs) return { valid: false, message: '授权复核回执时间异常' };
+  if (now.getTime() - checkedAt.getTime() > maxAgeMs) return { valid: false, message: '授权复核回执已过期' };
+
+  return {
+    valid: true,
+    status: payload.status,
+    message: payload.message,
+    checkedAt: payload.checkedAt,
+    receipt,
   };
 }

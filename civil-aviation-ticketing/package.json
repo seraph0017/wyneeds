@@ -7,7 +7,7 @@
   "main": "dist-node/electron/main.cjs",
   "scripts": {
     "dev": "concurrently -k -n API,WEB -c blue,green \"npm:server:dev\" \"vite --host 127.0.0.1 --port 5173\"",
-    "server:dev": "tsx watch server/standalone.ts",
+    "server:dev": "tsx watch server/standalone.ts --license-disabled",
     "server:start": "node dist-node/server/standalone.cjs",
     "test": "vitest run",
     "build": "vite build && node scripts/build-node.mjs",
@@ -16,9 +16,9 @@
     "electron:build": "npm run build && electron-builder",
     "dist:win": "npm run build && electron-builder --win portable --x64",
     "dist:win:arm64": "npm run build && electron-builder --win portable --arm64",
-    "license:keys": "node scripts/license-admin.mjs generate-keys --out-dir secrets/license",
-    "license:invite": "node scripts/license-admin.mjs create-invite",
-    "license:server": "node scripts/license-server.mjs"
+    "license:keys": "tsx scripts/license-admin.ts generate-keys --out-dir secrets/license",
+    "license:invite": "tsx scripts/license-admin.ts create-invite",
+    "license:server": "tsx scripts/license-server.ts"
   },
   "dependencies": {
     "cors": "2.8.5",
@@ -26,7 +26,8 @@
     "express-rate-limit": "7.5.0",
     "helmet": "7.2.0",
     "react": "18.3.1",
-    "react-dom": "18.3.1"
+    "react-dom": "18.3.1",
+    "tsx": "^4.23.0"
   },
   "devDependencies": {
     "@types/cors": "2.8.17",
@@ -39,7 +40,6 @@
     "electron": "^41.7.1",
     "electron-builder": "25.1.8",
     "esbuild": "0.24.2",
-    "tsx": "4.19.2",
     "typescript": "5.6.3",
     "vite": "5.4.11",
     "vitest": "2.1.8"

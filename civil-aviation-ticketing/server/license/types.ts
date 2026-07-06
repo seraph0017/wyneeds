@@ -19,6 +19,7 @@ export interface LicensePayload {
   activatedAt: string;
   expiresAt: string;
   offlineGraceDays: number;
+  licenseServerUrl?: string;
 }
 
 export interface LicenseEnvelope {
@@ -34,6 +35,9 @@ export type LicenseInvalidReason =
   | 'SIGNATURE_INVALID'
   | 'DEVICE_MISMATCH'
   | 'EXPIRED'
+  | 'REVOKED'
+  | 'REMOTE_UNKNOWN'
+  | 'ONLINE_CHECK_REQUIRED'
   | 'APP_MISMATCH'
   | 'PRODUCT_MISMATCH'
   | 'SCHEMA_UNSUPPORTED';
@@ -46,6 +50,26 @@ export interface LicenseSummary {
   deviceHash: string;
   deviceDisplayCode: string;
   offlineGraceDays: number;
+  licenseServerUrl?: string;
+}
+
+export type LicenseRemoteStatus = 'active' | 'revoked' | 'expired' | 'unknown';
+
+export interface LicenseCheckReceiptPayload {
+  schemaVersion: typeof LICENSE_SCHEMA_VERSION;
+  appId: string;
+  licenseId: string;
+  deviceHash: string;
+  status: LicenseRemoteStatus;
+  message: string;
+  checkedAt: string;
+}
+
+export interface LicenseCheckReceipt {
+  algorithm: 'Ed25519';
+  keyId: string;
+  payload: LicenseCheckReceiptPayload;
+  signature: string;
 }
 
 export interface LicenseValidationOptions {

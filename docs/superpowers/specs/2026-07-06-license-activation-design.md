@@ -37,19 +37,19 @@ Electron 主进程启动本地 Express API。API 新增授权接口：
 
 新增可部署脚本：
 
-- `scripts/license-admin.mjs`
+- `scripts/license-admin.ts`
   - 生成 Ed25519 keypair 到本地 `secrets/`。
   - 创建邀请码，写入授权服务 JSON 数据库。
   - 列出邀请码和激活设备数。
   - 吊销邀请码或指定 license。
-- `scripts/license-server.mjs`
+- `scripts/license-server.ts`
   - 提供 `POST /v1/activate`。
   - 提供 `POST /v1/check`。
   - 从环境变量读取私钥路径、邀请码数据库路径、监听端口。
   - 一码可配置 `maxDevices`，默认 1 台。
   - 同一设备重复激活幂等返回授权；超过设备数拒绝。
 
-正式域名后续只需要把客户端环境变量 `CA_LICENSE_SERVER_URL` 指向正式服务。
+正式域名后续只需要把开发环境变量 `CA_LICENSE_SERVER_URL` 指向正式服务；portable exe 可通过同目录 `license-config.json` 配置授权服务地址。
 
 ## 前端体验
 

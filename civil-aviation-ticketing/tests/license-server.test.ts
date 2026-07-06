@@ -1,9 +1,9 @@
-import { mkdtemp, rm, readFile } from 'node:fs/promises';
+import { mkdtemp, rm, readFile, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { generateKeyPairSync } from 'node:crypto';
 import { afterEach, describe, expect, it } from 'vitest';
-import { createInviteRecord, saveInviteDatabase, activateInvite, checkLicense } from '../server/license/issuer';
+import { createInviteRecord, saveInviteDatabase, activateInvite, checkLicense, loadInviteDatabase } from '../server/license/issuer';
 import { verifyLicenseEnvelope } from '../server/license/crypto';
 import { hashDeviceFingerprint } from '../server/license/device';
 import { LICENSE_APP_ID, LICENSE_PRODUCT } from '../server/license/types';
@@ -101,5 +101,60 @@ describe('license issuer and activation protocol', () => {
 
     expect(denied).toMatchObject({ ok: false, code: 'INVITE_REVOKED' });
     expect(check).toEqual({ ok: true, status: 'revoked', message: '授权已被停用' });
+  });
+
+  it('validates invite limits and date-only values before saving', () => {
+    const base = {
+      code: 'WY-2026-ABCD',
+      customerName: '参数校验客户',
+      now: new Date('2026-07-06T00:00:00.000Z'),
+    };
+
+    expect(() => createInviteRecord({ ...base, maxDevices: 0 })).toThrow('可绑定设备数必须是正整数');
+    expect(() => createInviteRecord({ ...base, licenseDays: Number.NaN })).toThrow('授权天数必须是正整数');
+    expect(() => createInviteRecord({ ...base, expiresAt: '2026-02-31' })).toThrow('授权到期日必须是 YYYY-MM-DD 格式');
+  });
+
+  it('rejects malformed invite databases instead of signing unsafe records', async () => {
+    const dir = await mkdtemp(path.join(tmpdir(), 'license-server-bad-db-'));
+    cleanup.push(dir);
+    const dbPath = path.join(dir, 'invites.json');
+    await writeFile(dbPath, JSON.stringify({
+      schemaVersion: 1,
+      invites: [{
+        codeHash: 'bad',
+        customerName: '坏数据客户',
+        maxDevices: 0,
+        licenseDays: 365,
+        expiresAt: '2027-07-06',
+        status: 'active',
+        createdAt: '2026-07-06T00:00:00.000Z',
+        features: ['ticketing'],
+        activations: [],
+      }],
+    }), 'utf8');
+
+    await expect(loadInviteDatabase(dbPath)).rejects.toThrow('可绑定设备数必须是正整数');
+    await expect(activateInvite(dbPath, { inviteCode: 'WY-2026-ABCD', deviceHash: hashDeviceFingerprint('device-a') }, {
+      privateKeyPem: keys().privateKeyPem,
+    })).rejects.toThrow('可绑定设备数必须是正整数');
+  });
+
+  it('reports active, expired, and unknown licenses during online check', async () => {
+    const { privateKeyPem } = keys();
+    const activeDbPath = await dbPathWithInvite();
+    const expiredDbPath = await dbPathWithInvite();
+    const deviceHash = hashDeviceFingerprint('device-a');
+    const active = await activateInvite(activeDbPath, { inviteCode: 'WY-2026-ABCD', deviceHash }, { privateKeyPem, keyId: 'test-key', now: new Date('2026-07-06T00:00:00.000Z') });
+    if (!active.ok) throw new Error(active.message);
+    const expired = await activateInvite(expiredDbPath, { inviteCode: 'WY-2026-ABCD', deviceHash }, { privateKeyPem, keyId: 'test-key', now: new Date('2026-07-06T00:00:00.000Z') });
+    if (!expired.ok) throw new Error(expired.message);
+
+    expect(await checkLicense(activeDbPath, { licenseId: active.envelope.payload.licenseId, deviceHash }, new Date('2026-07-07T00:00:00.000Z')))
+      .toEqual({ ok: true, status: 'active', message: '授权有效' });
+    expect(await checkLicense(expiredDbPath, { licenseId: expired.envelope.payload.licenseId, deviceHash }, new Date('2028-01-01T00:00:00.000Z')))
+      .toEqual({ ok: true, status: 'expired', message: '授权已过期' });
+    expect(await checkLicense(activeDbPath, { licenseId: 'LIC-NOT-FOUND', deviceHash }, new Date('2026-07-07T00:00:00.000Z')))
+      .toEqual({ ok: true, status: 'unknown', message: '授权记录不存在' });
   });
 });

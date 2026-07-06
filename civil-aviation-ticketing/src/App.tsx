@@ -31,7 +31,9 @@ interface LicenseStatusResponse {
   remoteReused?: boolean;
 }
 
-const apiPort = new URLSearchParams(window.location.search).get('apiPort');
+const launchParams = new URLSearchParams(window.location.search);
+const apiPort = launchParams.get('apiPort');
+const apiToken = launchParams.get('apiToken');
 const apiBase = apiPort ? `http://127.0.0.1:${apiPort}` : '';
 const today = new Date().toISOString().slice(0, 10);
 const cabinOrder: CabinClass[] = ['economy', 'business', 'first'];
@@ -102,7 +104,7 @@ function fieldError(errors: string[], words: string[]) {
 }
 
 async function getJson<T>(url: string): Promise<T> {
-  const res = await fetch(url);
+  const res = await fetch(url, { headers: apiToken ? { 'X-CA-Session': apiToken } : undefined });
   if (!res.ok) throw new Error(`请求失败：${res.status}`);
   return res.json() as Promise<T>;
 }
@@ -110,7 +112,7 @@ async function getJson<T>(url: string): Promise<T> {
 async function postJson<T>(url: string, body: unknown): Promise<T> {
   const res = await fetch(url, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', ...(apiToken ? { 'X-CA-Session': apiToken } : {}) },
     body: JSON.stringify(body),
   });
   const data = await res.json().catch(() => ({}));
@@ -125,16 +127,18 @@ function CitySearchInput({ label, value, cities, onChange, error }: { label: str
   const selected = cities.find((city) => city.code === value);
   const [query, setQuery] = useState(formatCity(selected));
   const inputRef = useRef<HTMLInputElement>(null);
+  const editingRef = useRef(false);
   const listId = `${label}-city-list`;
 
   useEffect(() => {
+    if (editingRef.current) return;
     setQuery(formatCity(selected));
   }, [selected?.code]);
 
   const pick = (nextValue: string) => {
     setQuery(nextValue);
     const code = parseCityCode(nextValue, cities);
-    if (code) onChange(code);
+    onChange(code ?? '');
   };
 
   return (
@@ -145,14 +149,21 @@ function CitySearchInput({ label, value, cities, onChange, error }: { label: str
           ref={inputRef}
           list={listId}
           value={query}
-          onFocus={(event) => event.currentTarget.select()}
+          onFocus={(event) => {
+            editingRef.current = true;
+            event.currentTarget.select();
+          }}
           onChange={(event) => pick(event.target.value)}
           onBlur={() => {
+            editingRef.current = false;
             const code = parseCityCode(query, cities);
             if (code) {
               const city = cities.find((item) => item.code === code);
               setQuery(formatCity(city));
               onChange(code);
+            } else {
+              setQuery('');
+              onChange('');
             }
           }}
           placeholder="输入城市、三字码或机场名搜索"
@@ -164,7 +175,9 @@ function CitySearchInput({ label, value, cities, onChange, error }: { label: str
           aria-label={`更换${label}`}
           onMouseDown={(event) => event.preventDefault()}
           onClick={() => {
+            editingRef.current = true;
             setQuery('');
+            onChange('');
             inputRef.current?.focus();
           }}
         >
@@ -216,7 +229,7 @@ function LicenseGate({ status, busy, onActivate }: { status: LicenseStatusRespon
         </div>
 
         {status?.message && <div className="license-warning" role="status">{status.message}</div>}
-        {!status?.activationServerConfigured && <div className="license-warning" role="status">当前未配置授权服务器地址。部署正式域名后设置 CA_LICENSE_SERVER_URL，即可使用邀请码在线激活。</div>}
+        {!status?.activationServerConfigured && <div className="license-warning" role="status">当前未配置授权服务器地址。部署正式域名后设置 CA_LICENSE_SERVER_URL，或在 exe 同目录放置 license-config.json，即可使用邀请码在线激活。</div>}
 
         <form className="license-form" onSubmit={submit}>
           <label className="field">授权邀请码
@@ -405,7 +418,7 @@ function App() {
     if (!window.confirm(`确认生成模拟订单并出票？\n航班：${request.flightSnapshot?.flightNo ?? request.flightId}\n人数：${request.passengers.length}\n金额：¥${totalAmount}`)) return;
     setLoading(true);
     try {
-      const res = await fetch(`${apiBase}/api/orders`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(request) });
+      const res = await fetch(`${apiBase}/api/orders`, { method: 'POST', headers: { 'Content-Type': 'application/json', ...(apiToken ? { 'X-CA-Session': apiToken } : {}) }, body: JSON.stringify(request) });
       const data = await res.json();
       if (!res.ok) throw new Error(data.errors?.join('；') ?? '订单提交失败');
       setLastOrder(data);
@@ -467,7 +480,7 @@ function App() {
     setLoading(true);
     setNotice(`正在处理${actionName}...`);
     try {
-      const res = await fetch(`${apiBase}/api/orders/${order.id}/${action}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+      const res = await fetch(`${apiBase}/api/orders/${order.id}/${action}`, { method: 'POST', headers: { 'Content-Type': 'application/json', ...(apiToken ? { 'X-CA-Session': apiToken } : {}) }, body: JSON.stringify(body) });
       const data = await res.json();
       if (!res.ok) throw new Error(data.errors?.join('；') ?? `${actionName}失败`);
       setNotice(`${actionName}处理完成`);

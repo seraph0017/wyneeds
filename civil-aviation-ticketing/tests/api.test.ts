@@ -9,7 +9,7 @@ let cleanup: Array<() => Promise<void>> = [];
 
 async function testServer() {
   const dataDir = await mkdtemp(path.join(tmpdir(), 'ca-ticketing-'));
-  const server = await startServer({ port: 0, dataDir, enableCors: true });
+  const server = await startServer({ port: 0, dataDir, enableCors: true, licenseRequired: false });
   cleanup.push(async () => {
     await server.close();
     await rm(dataDir, { recursive: true, force: true });

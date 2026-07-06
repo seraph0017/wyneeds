@@ -41,7 +41,7 @@
 
 ### License 授权文件
 
-桌面版授权文件保存在订单数据目录同级的 `license.json`。文件内容包含授权单位、设备 hash、有效期、功能列表和 Ed25519 签名；客户端只内置公钥，不能伪造新授权。授权服务邀请码数据库默认位于 `.license-server/invites.json`，部署时可通过 `CA_LICENSE_DB_PATH` 指定。
+桌面版授权文件保存在订单数据目录同级的 `license.json`。文件内容包含授权单位、设备 hash、有效期、功能列表、离线宽限期、授权服务地址和 Ed25519 签名；客户端只内置公钥，不能伪造新授权。联网复核状态保存在同目录 `license-state.json`，仅作为缓存；超过离线宽限期后仍需通过签名授权文件中的授权服务地址获取服务端签名复核回执。授权服务邀请码数据库默认位于 `.license-server/invites.json`，部署时可通过 `CA_LICENSE_DB_PATH` 指定。
 
 ### Passenger 乘机人
 

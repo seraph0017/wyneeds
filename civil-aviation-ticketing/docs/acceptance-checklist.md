@@ -2,7 +2,7 @@
 
 | 模块 | 要求 | 当前状态 | 证据 |
 |---|---|---|---|
-| ToB授权 | 首次联网邀请码激活、设备绑定、本地签名授权校验 | Pass | `server/license/*`、`tests/license-*.test.ts` |
+| ToB授权 | 首次联网邀请码激活、设备绑定、本地签名授权校验、联网复核停用/过期 | Pass | `server/license/*`、`tests/license-*.test.ts`、`tests/license-scripts-e2e.test.ts` |
 | 首页查询 | 机场/城市、三字码、日期、成人/儿童/婴儿人数 | Pass | `src/App.tsx` 搜索表单 |
 | 机场数据 | 覆盖国内主流与境外常用三字码，含名称、地区、机场 | Pass | `src/data/cities.ts` 72 条，含用户指定 57 个三字码 |
 | 城市校验 | 出发到达不能相同 | Pass | `validateFlightSearch`、`tests/domain.test.ts` |
@@ -22,5 +22,5 @@
 | Loading/Error | 加载和错误提示 | Pass | `notice`、`loading` 状态 |
 | 二次确认 | 关键操作确认 | Pass | `window.confirm` |
 | Windows桌面 | Electron 打包 x64/arm64 exe，配置自定义图标 | Pass | `release/民航客票销售订座系统-1.1.0-x64.exe`、`release/民航客票销售订座系统-1.1.0-arm64.exe` |
-| 测试 | 核心领域规则、API、机场/航线数据测试 | Pass | `npm test` 35 tests |
+| 测试 | 核心领域规则、API、机场/航线数据测试 | Pass | `npm test` 55 tests |
 | 安全审计 | 生产依赖 audit 无 high/critical | Pass | `npm audit --omit=dev --audit-level=high` 通过；dev/build 链风险见 data/security review |

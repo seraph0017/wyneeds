@@ -1,4 +1,4 @@
-import type { LicenseEnvelope } from './types';
+import type { LicenseCheckReceipt, LicenseEnvelope, LicenseRemoteStatus } from './types';
 
 export type ActivationClientResult =
   | { ok: true; envelope: LicenseEnvelope; reused?: boolean }
@@ -17,8 +17,11 @@ export interface RemoteCheckRequest {
 
 export interface RemoteCheckResult {
   ok: boolean;
-  status?: 'active' | 'revoked' | 'unknown';
+  status?: LicenseRemoteStatus;
   message: string;
+  code?: string;
+  statusCode?: number;
+  receipt?: LicenseCheckReceipt;
 }
 
 async function postJson<T>(url: string, body: unknown, timeoutMs: number): Promise<T> {
@@ -65,7 +68,12 @@ export async function checkWithServer(serverUrl: string, request: RemoteCheckReq
   try {
     return await postJson<RemoteCheckResult>(`${base}/v1/check`, request, timeoutMs);
   } catch (error) {
-    const err = error as { message?: string; name?: string };
-    return { ok: false, message: err.name === 'AbortError' ? '授权复核连接超时' : err.message || '授权复核服务不可用' };
+    const err = error as { message?: string; status?: number; code?: string; name?: string };
+    return {
+      ok: false,
+      code: err.name === 'AbortError' ? 'TIMEOUT' : err.code || 'NETWORK_ERROR',
+      statusCode: err.status,
+      message: err.name === 'AbortError' ? '授权复核连接超时' : err.message || '授权复核服务不可用',
+    };
   }
 }

@@ -27,7 +27,7 @@
 
 - 桌面版启动本地 API 时默认启用授权门禁，未激活时业务 API 返回 `LICENSE_REQUIRED`。
 - 授权采用 Ed25519 签名文件和设备 hash 绑定，客户端只内置公钥。
-- 已提供邀请码管理脚本和可部署授权服务脚本；正式域名后续配置 `CA_LICENSE_SERVER_URL`。
+- 已提供邀请码管理脚本和可部署授权服务脚本；正式域名后续可通过 `CA_LICENSE_SERVER_URL` 或 portable exe 同目录 `license-config.json` 配置。
 
 - Electron 桌面模式不再关闭 CORS，允许 `file://` 页面访问本地随机端口 API。
 - 主进程启动本地 API，使用 `app.getPath('userData')` 保存订单。
@@ -44,5 +44,5 @@
 
 ## 最终产物哈希
 
-- x64 SHA256: `9fc9964e158e8a17219cbfce86faf152019c31954f48a962e334da5502e40674`
-- arm64 SHA256: `8d1d4f3421ec02ecc2caa18a0b726c46a41734bc0449c1cadeb882defec39208`
+- x64 SHA256: `cd981815585203ba4a20db0ac6a62afc90cdfdc433c8ac3e1f65f734a329b0d3`
+- arm64 SHA256: `10d2a0a39744f787a959e379449aaa35b2d69a818e83a34f7bd4631ecde1012c`

@@ -32,8 +32,8 @@
 **Files:**
 - Create: `civil-aviation-ticketing/server/license/activationClient.ts`
 - Create: `civil-aviation-ticketing/server/license/issuer.ts`
-- Create: `civil-aviation-ticketing/scripts/license-admin.mjs`
-- Create: `civil-aviation-ticketing/scripts/license-server.mjs`
+- Create: `civil-aviation-ticketing/scripts/license-admin.ts`
+- Create: `civil-aviation-ticketing/scripts/license-server.ts`
 - Test: `civil-aviation-ticketing/tests/license-server.test.ts`
 
 - [ ] Write failing tests for invite activation, same-device idempotency, device limit rejection, and revoked invite rejection.

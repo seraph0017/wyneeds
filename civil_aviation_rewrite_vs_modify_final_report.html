@@ -294,7 +294,7 @@
     </div>
     <table style="margin-top:16px">
       <thead><tr><th style="width:170px">模块</th><th>当前能力</th><th style="width:90px">状态</th></tr></thead>
-      <tbody><tr><td class="module-name">首页查询</td><td>城市下拉搜索、日期、成人/儿童/婴儿人数</td><td><span class="pill ok">Pass</span></td></tr><tr><td class="module-name">城市数据</td><td>55 个城市，含三字码、省份、机场</td><td><span class="pill ok">Pass</span></td></tr><tr><td class="module-name">航班列表</td><td>航班号、起降机场、时间、时长、机型、余票、舱位、价格、航司标识</td><td><span class="pill ok">Pass</span></td></tr><tr><td class="module-name">旅客规则</td><td>成人、儿童、婴儿、UM 的年龄、证件和陪同规则</td><td><span class="pill ok">Pass</span></td></tr><tr><td class="module-name">订单确认</td><td>航班、旅客、价格、运输规则摘要和二次确认</td><td><span class="pill ok">Pass</span></td></tr><tr><td class="module-name">库存扣减</td><td>下单扣减余票，余票不足阻止提交</td><td><span class="pill ok">Pass</span></td></tr><tr><td class="module-name">订单管理</td><td>列表、详情、取消、退票、同航线改签模拟</td><td><span class="pill ok">Pass</span></td></tr><tr><td class="module-name">运输规则</td><td>行李、退票、改签、特殊旅客规则</td><td><span class="pill ok">Pass</span></td></tr><tr><td class="module-name">电子客票</td><td>PNR、票号、航班、旅客、二维码区域、打印/PDF 模拟</td><td><span class="pill ok">Pass</span></td></tr><tr><td class="module-name">桌面应用</td><td>Windows x64 / arm64 portable exe</td><td><span class="pill ok">Pass</span></td></tr></tbody>
+      <tbody><tr><td class="module-name">首页查询</td><td>城市下拉搜索、日期、成人/儿童/婴儿人数</td><td><span class="pill ok">Pass</span></td></tr><tr><td class="module-name">城市数据</td><td>72 个机场/城市，含三字码、省份/地区、机场</td><td><span class="pill ok">Pass</span></td></tr><tr><td class="module-name">航班列表</td><td>航班号、起降机场、时间、时长、机型、余票、舱位、价格、航司标识</td><td><span class="pill ok">Pass</span></td></tr><tr><td class="module-name">旅客规则</td><td>成人、儿童、婴儿、UM 的年龄、证件和陪同规则</td><td><span class="pill ok">Pass</span></td></tr><tr><td class="module-name">订单确认</td><td>航班、旅客、价格、运输规则摘要和二次确认</td><td><span class="pill ok">Pass</span></td></tr><tr><td class="module-name">库存扣减</td><td>下单扣减余票，余票不足阻止提交</td><td><span class="pill ok">Pass</span></td></tr><tr><td class="module-name">订单管理</td><td>列表、详情、取消、退票、同航线改签模拟</td><td><span class="pill ok">Pass</span></td></tr><tr><td class="module-name">运输规则</td><td>行李、退票、改签、特殊旅客规则</td><td><span class="pill ok">Pass</span></td></tr><tr><td class="module-name">电子客票</td><td>PNR、票号、航班、旅客、二维码区域、打印/PDF 模拟</td><td><span class="pill ok">Pass</span></td></tr><tr><td class="module-name">桌面应用</td><td>Windows x64 / arm64 portable exe</td><td><span class="pill ok">Pass</span></td></tr></tbody>
     </table>
     <div class="screens">
           <figure class="shot">
@@ -317,7 +317,7 @@
     <h2>7. 验收和交付物</h2>
     <p class="lead">本次收尾已重新跑过测试、类型检查、构建和生产依赖审计。结果如下。</p>
     <div class="kpis">
-      <div class="kpi green"><b>19/19</b><span>Vitest 领域规则与 API 测试全部通过。</span></div>
+      <div class="kpi green"><b>55/55</b><span>Vitest 领域、API、机场数据与授权测试全部通过。</span></div>
       <div class="kpi green"><b>通过</b><span>TypeScript 类型检查通过。</span></div>
       <div class="kpi green"><b>通过</b><span>Web/Node/Electron 主进程构建通过。</span></div>
       <div class="kpi green"><b>0 high</b><span>生产依赖 audit：found 0 vulnerabilities。</span></div>
@@ -325,8 +325,8 @@
     <h3 style="margin:22px 0 10px;color:var(--deep)">Windows 桌面程序</h3>
     <table>
       <thead><tr><th>文件</th><th style="width:90px">大小</th><th>SHA256</th></tr></thead>
-      <tbody><tr><td>民航客票销售订座系统-1.0.0-arm64.exe</td><td>89 MB</td><td><code>f820fdf18effcd4cc2eb6840f6264d0d64d6998d892b535c086ead21ca62cf18</code></td></tr>
-<tr><td>民航客票销售订座系统-1.0.0-x64.exe</td><td>88 MB</td><td><code>01dd813e66613603ebf30ba6db1c8278c54063ec1ab2f130b7bbf3caee864525</code></td></tr></tbody>
+      <tbody><tr><td>民航客票销售订座系统-1.1.0-arm64.exe</td><td>93 MB</td><td><code>10d2a0a39744f787a959e379449aaa35b2d69a818e83a34f7bd4631ecde1012c</code></td></tr>
+<tr><td>民航客票销售订座系统-1.1.0-x64.exe</td><td>91 MB</td><td><code>cd981815585203ba4a20db0ac6a62afc90cdfdc433c8ac3e1f65f734a329b0d3</code></td></tr></tbody>
     </table>
     <div class="files">
       <div class="filebox"><b>文档</b><p><code>civil-aviation-ticketing/docs/requirements.md</code><br/><code>docs/database-design.md</code><br/><code>docs/student-guide.md</code><br/><code>docs/teacher-admin-guide.md</code><br/><code>docs/acceptance-checklist.md</code></p></div>
@@ -339,8 +339,8 @@
     <p class="lead">建议把旧包作为参考资料归档，新系统作为交付主线。后续如果要提高正式感，优先处理下面几件事。</p>
     <div class="timeline">
       <div class="step"><div class="dot">1</div><div><h3>主交付用新系统</h3><p>面向业务方演示时，使用 <code>civil-aviation-ticketing</code> 和 Windows x64 exe。旧包不再作为主工程改造。</p></div></div>
-      <div class="step"><div class="dot">2</div><div><h3>发送前优先选 x64</h3><p>大多数 Windows 电脑用 <code>民航客票销售订座系统-1.0.0-x64.exe</code>。arm64 只给 ARM 架构 Windows 设备。</p></div></div>
-      <div class="step"><div class="dot">3</div><div><h3>如果要更像正式软件</h3><p>补代码签名证书、自定义 .ico 图标和安装器；这样能减少 SmartScreen 提示，也更适合外发。</p></div></div>
+      <div class="step"><div class="dot">2</div><div><h3>发送前优先选 x64</h3><p>大多数 Windows 电脑用 <code>民航客票销售订座系统-1.1.0-x64.exe</code>。arm64 只给 ARM 架构 Windows 设备。</p></div></div>
+      <div class="step"><div class="dot">3</div><div><h3>如果要更像正式软件</h3><p>补代码签名证书、正式安装器和自动更新；当前已配置自定义图标，代码签名可减少 SmartScreen 提示。</p></div></div>
       <div class="step"><div class="dot">4</div><div><h3>如果要多人课堂使用</h3><p>把本地 JSON 换成 MySQL/PostgreSQL，增加登录、角色权限和教师端数据重置/导出。</p></div></div>
     </div>
     <div class="callout"><b>最终口径：</b>达到需求文档目标时，重写比改旧包简单。旧包保留为业务参考和素材来源；最终交付以新系统为准。</div>

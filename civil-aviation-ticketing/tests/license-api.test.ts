@@ -132,4 +132,40 @@ describe('license protected API', () => {
     expect(statusAfterRemoteClosed).toMatchObject({ licensed: true, summary: { customerName: '接口测试客户' } });
     expect(cities.status).toBe(200);
   });
+
+  it('preserves remote activation status codes for invite and device-limit errors', async () => {
+    const { publicKeyPem } = keys();
+    const deviceHash = hashDeviceFingerprint('remote-denied-device');
+    let remoteServer: Server | undefined;
+    const remote = await new Promise<string>((resolve) => {
+      remoteServer = createServer((_req, res) => {
+        const response = JSON.stringify({ ok: false, code: 'DEVICE_LIMIT_REACHED', message: '邀请码可绑定设备数已用完' });
+        res.writeHead(409, { 'Content-Type': 'application/json' });
+        res.end(response);
+      }).listen(0, '127.0.0.1', () => {
+        const address = remoteServer!.address();
+        if (address && typeof address === 'object') resolve(`http://127.0.0.1:${address.port}`);
+      });
+    });
+    cleanup.push(async () => new Promise<void>((resolve) => {
+      if (!remoteServer) return resolve();
+      return remoteServer.close(() => resolve());
+    }));
+
+    const baseUrl = await licensedServer({ publicKeyPem, deviceHash, activationServerUrl: remote });
+    const response = await fetch(`${baseUrl}/api/license/activate`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ inviteCode: 'WY-2026-USED' }),
+    });
+    const body = await json(response);
+
+    expect(response.status).toBe(409);
+    expect(body).toMatchObject({
+      licensed: false,
+      remoteCode: 'DEVICE_LIMIT_REACHED',
+      remoteStatus: 409,
+      message: '邀请码可绑定设备数已用完',
+    });
+  });
 });
