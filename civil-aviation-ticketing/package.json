@@ -1,6 +1,6 @@
 {
   "name": "civil-aviation-ticketing",
-  "version": "1.0.3",
+  "version": "1.1.0",
   "private": true,
   "description": "民航客票销售订座教学实训系统，支持 Web 与 Windows 桌面应用。",
   "type": "module",
@@ -15,7 +15,10 @@
     "electron:dev": "npm run build && electron .",
     "electron:build": "npm run build && electron-builder",
     "dist:win": "npm run build && electron-builder --win portable --x64",
-    "dist:win:arm64": "npm run build && electron-builder --win portable --arm64"
+    "dist:win:arm64": "npm run build && electron-builder --win portable --arm64",
+    "license:keys": "node scripts/license-admin.mjs generate-keys --out-dir secrets/license",
+    "license:invite": "node scripts/license-admin.mjs create-invite",
+    "license:server": "node scripts/license-server.mjs"
   },
   "dependencies": {
     "cors": "2.8.5",

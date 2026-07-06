@@ -6,7 +6,7 @@
 
 - 若只做旧系统演示，改 `hangkong.zip` 更快。
 - 若要达到 `~/Downloads/民航客票销售订座系统_需求文档.docx` 的目标，重写更简单、更稳。
-- 新系统已按教学/实训模拟口径实现，并生成 Windows x64 / arm64 portable 程序。
+- 新系统已按教学/实训模拟口径实现，并生成 Windows x64 / arm64 portable 程序；桌面版 1.1.0 增加邀请码激活、设备绑定和本地签名授权校验。
 
 ## 主要文件
 
@@ -40,8 +40,8 @@ http://127.0.0.1:5173/
 优先发 x64 版本给普通 Windows 电脑：
 
 ```text
-civil-aviation-ticketing/release/民航客票销售订座系统-1.0.3-x64.exe
-civil-aviation-ticketing/release/民航客票销售订座系统-1.0.3-arm64.exe
+civil-aviation-ticketing/release/民航客票销售订座系统-1.1.0-x64.exe
+civil-aviation-ticketing/release/民航客票销售订座系统-1.1.0-arm64.exe
 ```
 
 当前程序未代码签名，首次运行可能出现 SmartScreen 提示。发布前建议在真实 Windows x64 机器上双击冒烟一次。
@@ -56,4 +56,4 @@ npm run build
 npm audit --omit=dev --audit-level=high
 ```
 
-2026-07-04 验收结果：26 个测试通过，类型检查通过，构建通过，生产依赖审计 `found 0 vulnerabilities`。
+2026-07-06 验收结果：35 个测试通过，类型检查通过，构建通过，生产依赖审计 `found 0 vulnerabilities`。

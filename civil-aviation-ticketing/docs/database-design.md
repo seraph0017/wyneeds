@@ -38,6 +38,11 @@
 
 数据文件：`src/data/flights.ts` 与 `src/data/imported-flight-data.json`。当前运行时合计 10466 条模拟航班，其中合并下载文件中的 242 条结构化航班数据，并为机场两两组合生成至少 2 班可订座模拟航班。
 
+
+### License 授权文件
+
+桌面版授权文件保存在订单数据目录同级的 `license.json`。文件内容包含授权单位、设备 hash、有效期、功能列表和 Ed25519 签名；客户端只内置公钥，不能伪造新授权。授权服务邀请码数据库默认位于 `.license-server/invites.json`，部署时可通过 `CA_LICENSE_DB_PATH` 指定。
+
 ### Passenger 乘机人
 
 支持成人、儿童、婴儿、无成人陪伴儿童。
